@@ -1,3 +1,4 @@
+#Requires -Version 7.0
 <#
  Microsoft provides programming examples for illustration only, without warranty either expressed or
  implied, including, but not limited to, the implied warranties of merchantability and/or fitness
@@ -12,17 +13,21 @@
  ---------------------------------------------------------------------------------------------------------------------------
  History
  ---------------------------------------------------------------------------------------------------------------------------
- v1.0 - 01/02/2024 - MARKKOR Created
+ v1.0 - 01/04/2024 - MARKKOR Created
  ============================================================================================================================
  
  This script is provided as is and without warranty. Please review it closely
  and fully test it in a non-production environment before implementing it
  in a production M365 tenant.
+
+ Because of the -AsPlainText parameter on ConvertFrom-SecureString, PowerShell 7 is required
 #>
-$defaultLocation = "C:\Users\markkor\OneDrive\Code\PowerShell\PowerApps"
+
+# use the same $defaultLocation variable in both the import and export script
+$defaultLocation = "[Path to store export/import files]"
 
 #Initialize variable for Source environment
-$sourceEnv = "https://org5b2d9cff.crm.dynamics.com"
+$sourceEnv = "https://[ORGURL].crm.dynamics.com"
 
 <############    YOU SHOULD NOT HAVE TO MODIFY ANYTHING BELOW THIS POINT    ############>
 
@@ -36,8 +41,8 @@ Set-Location -Path $defaultLocation
 $exportCSV = [System.IO.Path]::Combine($defaultLocation, "Exports.csv")
 
 # Get user credentials for source environment
-# $userName = Read-Host "Please Enter user name"
-# $password = ConvertFrom-SecureString(Read-Host -AsSecureString "Please enter password") -AsPlainText
+$userName = Read-Host "Please enter user name"
+$password = ConvertFrom-SecureString(Read-Host -AsSecureString "Please enter password") -AsPlainText
 
 #Connect to Source Environment
 Write-Host "Authenticating... "
@@ -58,7 +63,7 @@ $ManagedField      = $header.IndexOf("Managed")
 $unmanagedSolutions = $allSolutions | Select-Object -skip 5 | `
   Where-Object { `
     $_.length -gt $ManagedField -and `
-    $_.Substring($ManagedField) -eq "False" -and `
+    $_.Substring($ManagedField).Trim() -eq "False" -and `
     $_.Substring($FriendlyNameField, $VersionField - $FriendlyNameField).Trim() -ne "Common Data Services Default Solution" -and `
     $_.Substring($uniqueNameField, $FriendlyNameField - $uniqueNameField).Trim() -ne "Default"} | `
     Select-Object `
@@ -73,25 +78,27 @@ $activity = "Exporting solutions..."
 # Loop Through Solutions, export as zipped file and create Deployment Settings File
 foreach ($solution in $unmanagedSolutions)
 {
-  $sol = $solution.UniqueName
+  $solutionName = $solution.UniqueName
 
   # progress bar
   $i++
-  Write-Progress -Activity $activity -Status "($i/$($sol.Count)) - Exporting $sol" -PercentComplete ($i/$unmanagedSolutions.Count*100)
+  Write-Progress -Activity $activity -Status "($i/$($unmanagedSolutions.Count)) - Exporting $solutionName" -PercentComplete ($i/$unmanagedSolutions.Count*100)
 
-  Write-Host "Exporting Solution [$sol]"
-  pac solution export --name $sol --path .\ --managed false
-  pac solution create-settings --solution-zip .\$sol.zip --settings-file .\$sol.json
+  Write-Host ""
+  Write-Host "Exporting Solution: " -NoNewline
+  Write-Host "$solutionName" -ForegroundColor Yellow
+  pac solution export --name $solutionName --path .\ --managed false
+  pac solution create-settings --solution-zip .\$solutionName.zip --settings-file .\$solutionName.json
 
   # add a row to the CSV output file for this solution
   [PSCustomObject]@{
-    UniqueName             = $sol
+    UniqueName             = $solution.UniqueName
     FriendlyName           = $solution.FriendlyName
     Version                = $solution.Version
     Managed                = $solution.Managed
-    ZipSavedLocation       = [System.IO.Path]::Combine($defaultLocation, "$sol.zip")
-    JSONSavedLocation      = [System.IO.Path]::Combine($defaultLocation, "$sol.json")
-    DestinationEnvironment = ""
+    ZipSavedLocation       = [System.IO.Path]::Combine($defaultLocation, "$solutionName.zip")
+    JSONSavedLocation      = [System.IO.Path]::Combine($defaultLocation, "$solutionName.json")
+    DestinationEnvironment = "" # to be completed by admin before solution is imported
   } | Export-Csv -Path $exportCSV -NoTypeInformation -Append
 }
 Write-Progress -Activity $activity -Completed -PercentComplete 100
