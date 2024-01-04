@@ -1,5 +1,5 @@
 # PowerApps
-This project was created to assist with the mass movement of Power Apps solutions from
+This project was created to assist with the mass movement of Power Platform solutions from
 one environment, like the default environment, into one more other environments,
 like user environments.
 This code mimics the code created by Suparna Banerjee which can be found at:
