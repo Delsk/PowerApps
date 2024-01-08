@@ -1,7 +1,11 @@
 # PowerApps
 This project was created to assist with the mass movement of Power Platform solutions 
-from one environment, like the default environment, into one more other environments,
-like user environments.
+from one environment, like the default environment, into one or more other 
+environments. 
+
+This could help in the event of an environment strategy being implemented or even
+from ongoing maintenance of an environment, like the default environment.
+
 This code mimics the code created by Suparna Banerjee which can be found at:
 https://suparnatechbasket.wordpress.com/2023/07/26/bulk-move-dataverse-solutions/
 
@@ -16,6 +20,7 @@ Suparna states in her document:
   https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction#install-using-power-platform-tools-for-visual-studio-code
 * Power Platform CLI for Windows
   https://learn.microsoft.com/en-us/power-platform/developer/cli/introduction#install-power-platform-cli-for-windows
+
 Because of the -AsPlainText parameter on the ConvertFrom-SecureString cmdlet, 
 these scripts require PowerShell 7.0 as that parameter is not available until PS 7.0.
 
