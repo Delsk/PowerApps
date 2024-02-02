@@ -3,6 +3,13 @@
  https://suparnatechbasket.wordpress.com/2023/07/26/bulk-move-dataverse-solutions/
  Her page will outline the prerequisites for running this script.
 
+ This script has been tested with version 1.30.6 of the Power Platform CLI (pac). 
+ I've seen unusual errors when using later versions of the CLI. If you encounter errors,
+ consider using the command 
+    pac install 1.30.6
+ to install version 1.30.6 of the CLI. Alternatively, you can download that version here:
+    https://download.microsoft.com/download/D/B/E/DBE69906-B4DA-471C-8960-092AB955C681/powerapps-cli-1.0.msi
+
  Microsoft provides programming examples for illustration only, without warranty either expressed or
  implied, including, but not limited to, the implied warranties of merchantability and/or fitness
  for a particular purpose.
